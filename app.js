@@ -16,7 +16,7 @@ xhr.onreadystatechange = () => {
   }
 };
 // url to call api
-xhr.open("GET", "https://salty-sea-40504.herokuapp.com/movies");
+//xhr.open("GET", "https://salty-sea-40504.herokuapp.com/movies");
 xhr.open("GET", "https://vast-basin-71998.herokuapp.com/movie/");
 xhr.send();
 
