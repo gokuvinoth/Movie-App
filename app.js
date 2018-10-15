@@ -69,101 +69,119 @@ const displayListView = apiData => {
 };
 
 const NavDetailview = id => {
-  console.log(typeof APIData[0]._id);
-  var ojectsArray = APIData.find(function(element) {
+  let movieDetails = APIData.find(function(element) {
     return element._id === id;
   });
-  console.log(ojectsArray);
-  console.log(3.5 - (3.5 % 1));
+  console.log(movieDetails);
+  console.log(movieDetails.sessions);
 
-  resultElement.innerHTML = ` <div class="movie-details-tcontainer" id="${
-    ojectsArray._id
-  }">
-  <div class="movie-details-trailer" id="${ojectsArray._id}">
+  movieDetails.sessions.forEach(session => {
+    console.log(session.state + "-" + session.location);
+    console.log(createSessionhtml(session.sessionDateTime));
+  });
+
+  resultElement.innerHTML = `<div class="movie-details-tcontainer" id="moviedetailscontainer">
+  <div class="movie-details-trailer" id="moviedetailstrailer">
       <iframe class="movie-trailer" id="${
-        ojectsArray._id
+        movieDetails._id
       }" src="https://www.youtube.com/embed/${
-    ojectsArray.trailer.split("=")[1]
-  }" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+    movieDetails.trailer.split("=")[1]
+  }"
+frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   </div>
-  <div class="movie-details-info" id="${ojectsArray._id}">
-      <div class="movie-info-list" id="${ojectsArray._id}">
-          <div class="movie-genre" id="${
-            ojectsArray._id
-          }">Genre : Commercial</div>
-          <div class="movie-duration" id="${
-            ojectsArray._id
-          }">Duration : 2h 30m <span class="fa fa-hourglass-half"
-                  aria-hidden="true"></span></div>
-          <div class="movie-rating" id="${ojectsArray._id}">
-          ${(
-            '<i class="fa fa-star movie-star-rating" id="' +
-            ojectsArray._id +
-            '" aria-hidden=" true"></i>'
-          ).repeat(3)}
-              <i class="fa fa-star-half-o movie-star-rating" id="${
-                ojectsArray._id
-              }" aria-hidden=" true"></i>
-              <i class="fa fa-star-o movie-star-rating" id="${
-                ojectsArray._id
-              }" aria-hidden=" true"></i>
+  <div class="movie-details-info" id="moviedetailsinfo">
+      <div class="movie-info-list" id="movieinfolist">
+          <div class="movie-genre" id="moviegenre"><span class="genre-detail" id="genredetail">Genre :</span>
+              Commercial</div>
+          <div class="movie-duration" id="movieduration"><span class="genre-detail" id="genredetail">Duration
+                  :</span> 2h 30m <i class="fa fa-hourglass-half movie-duration-time" id="moviedurationtime"
+                  aria-hidden="true"></i></div>
+          <div class="movie-rating" id="movierating">
+              ${(
+                '<i class="fa fa-star movie-star-rating" id="' +
+                movieDetails._id +
+                '" aria-hidden=" true"></i>'
+              ).repeat(3)}
+              <i class="fa fa-star-half-o movie-star-rating" id="moviestarrating" aria-hidden=" true"></i>
+              <i class="fa fa-star-o movie-star-rating" id="moviestarrating" aria-hidden=" true"></i>
           </div>
           <div class="movie-details-session">
-              <i class="fa fa-calendar movie-session-calendar" id="${
-                ojectsArray._id
-              }" aria-hidden="true"></i>
-              20 Dec 2018
-              <br><i class="fa fa-clock-o movie-session-clock" id="${
-                ojectsArray._id
-              }" aria-hidden="true"></i>
-              9 pm</div>
+                  ${movieDetails.sessions
+                    .map(session => {
+                      return (
+                        session.state +
+                        " - " +
+                        session.location +
+                        "<br>" +
+                        createSessionhtml(session.sessionDateTime)
+                      );
+                    })
+                    .join("\n")}</div>
       </div>
   </div>
 </div>
-<div class="movie-details-story-container" id="${ojectsArray._id}">
-  <div class="movie-details-story" id="${ojectsArray._id}">
-      <div class="movie-details-title"> ${ojectsArray.title}</div>${
-    ojectsArray.synopsis
-  }
-      <br>
-      <div class="movie-details-title"><i class="fa fa-users" aria-hidden="true"></i>Starring</div>
-      <ul class="movie-cast-list" id="${ojectsArray._id}">
-       
-      ${ojectsArray.leadActors
+<div class="movie-details-story-container" id="moviedetailsstorycontainer">
+  <div class="movie-details-story" id="moviedetailsstory">
+      <div class="movie-details-title"> ${movieDetails.title}</div>
+      <div class="movie-detailed-script" id="moviedetailedscript">
+          <p>${movieDetails.synopsis}</p>
+      </div>
+      <div class="movie-details-title"><i class="fa fa-users movie-cast" id="moviecast" aria-hidden="true"></i>Starring</div>
+      <ul class="movie-cast-list" id="moviecastlist">
+      ${movieDetails.leadActors
         .split(",")
         .map(leadActor => {
-          return '<li class="movie-cast-name" id="">' + leadActor + "</li>";
+          return '<li class="movie-cast-name" id="">' + leadActor;
         })
-        .join("\n")}
-<br>
-${Object.keys(ojectsArray.crew)
-    .map(crew => {
-      return (
-        '<li class="movie-cast-name" id="">' +
-        crew +
-        " : " +
-        ojectsArray.crew[crew] +
-        "</li>"
-      );
-    })
-    .join("\n")}
+        .join(",</li>\n") + ".</li>"}
+      </ul>
+      <div class="movie-crew">Crew</div>
+      <ul class="movie-crew-list" id="moviecrewlist">
+          <li class="movie-crew-name" id="moviecrewname"><span class="genre-detail" id="genredetail">Director
+                  :</span>
+              ${movieDetails.crew.director},</li>
+          <li class="movie-crew-name" id="moviecrewname"><span class="genre-detail" id="genredetail">Music-Director
+                  :</span>
+              ${movieDetails.crew.musicDirector}</li>
       </ul>
 
   </div>
-  <div class="movie-details-booking" id="${ojectsArray._id}">
-      <button class="movie-book-btn"><i class="fa fa-ticket movie-ticket" id="${
-        ojectsArray._id
-      }" aria-hidden="true"></i>Book
+  <div class="movie-details-booking" id="moviedetailsbooking">
+      <button class="movie-book-btn"><i class="fa fa-ticket movie-ticket" id="movieticket" aria-hidden="true"></i>Book
           now</button>
-      <button class="movie-back-btn" id="detailsBackBtn"><i class="fa fa-undo previous-page" id="${
-        ojectsArray._id
-      }" aria-hidden="true"></i>Back</button>
+      <button id='detailsBackBtn' class="movie-back-btn"><i class="fa fa-undo previous-page" id="previouspage" aria-hidden="true"></i>Back</button>
 
   </div>
 
 
-</div>
-`;
+</div>`;
+
+  function createSessionhtml(sessionDateTimes) {
+    let sessionObj = {};
+    let dateTimeHtmlElement = "";
+
+    sessionDateTimes.forEach(sessionDateTime => {
+      sessionObj[sessionDateTime.split(" ")[0]] = [];
+    });
+
+    sessionDateTimes.forEach(sessionDateTime => {
+      sessionObj[sessionDateTime.split(" ")[0]].push(
+        sessionDateTime.split(" ")[1]
+      );
+    });
+
+    Object.keys(sessionObj).forEach(date => {
+      dateTimeHtmlElement +=
+        '<i class="fa fa-calendar movie-session-calendar" id="${movieDetails._id}" aria-hidden="true"></i> ' +
+        date +
+        ' : <i class="fa fa-clock-o movie-session-clock" id="${movieDetails._id}" aria-hidden="true"></i> ';
+      dateTimeHtmlElement += sessionObj[date].join(", ");
+
+      dateTimeHtmlElement += "<br>";
+    });
+
+    return dateTimeHtmlElement;
+  }
 
   let backBtn = document.querySelector("#detailsBackBtn");
   backBtn.addEventListener("click", function() {
