@@ -9,13 +9,14 @@ const xhr = new XMLHttpRequest();
 xhr.responseType = "json";
 xhr.onreadystatechange = () => {
   if (xhr.readyState === XMLHttpRequest.DONE) {
-    APIData = xhr.response;
+    APIData = xhr.response.content;
     // function call to process api result
+    console.log(APIData);
     displayListView(APIData);
   }
 };
 // url to call api
-xhr.open("GET", "https://vast-basin-71998.herokuapp.com/movie");
+xhr.open("GET", "https://salty-sea-40504.herokuapp.com/api/v1/movies/getAll");
 xhr.send();
 
 // mapping response to respective HTML elements
@@ -40,7 +41,8 @@ renderHtml = responseData => {
     responseData._id,
     "To be Named"
   )} href="#">${chkNull(
-    responseData.sessions[0].sessionDateTime[0],
+    // responseData.sessions[0].sessionDateTime[0],
+    "",
     "Coming Soon"
   )}</a></li>
         <li class="movie-language" id=${chkNull(
@@ -75,11 +77,36 @@ const NavDetailview = id => {
   console.log(movieDetails);
   console.log(movieDetails.sessions);
 
-  movieDetails.sessions.forEach(session => {
-    console.log(session.state + "-" + session.location);
-    console.log(createSessionhtml(session.sessionDateTime));
-  });
-
+  // movieDetails.sessions.forEach(session => {
+  //   console.log(session.state + "-" + session.location);
+  //   console.log(createSessionhtml(session.sessionDateTime));
+  // });
+  let tempmovieDetails = {};
+  tempmovieDetails.sessions = [
+    {
+      location: "Liverpool",
+      state: "NSW",
+      sessionDateTime: ["30/10/2018 17:00"]
+    },
+    {
+      location: "Paramatta",
+      state: "NSW",
+      sessionDateTime: [
+        "30/10/2018 12:00",
+        "30/10/2018 17:00",
+        "29/10/2018 12:00"
+      ]
+    },
+    {
+      location: "Manuka",
+      state: "ACT",
+      sessionDateTime: [
+        "30/11/2018 17:00",
+        "30/11/2018 19:00",
+        "29/11/2018 17:00"
+      ]
+    }
+  ];
   resultElement.innerHTML = `<div class="movie-details-tcontainer" id="moviedetailscontainer">
   <div class="movie-details-trailer" id="moviedetailstrailer">
       <iframe class="movie-trailer" id="${
@@ -106,7 +133,7 @@ frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
               <i class="fa fa-star-o movie-star-rating" id="moviestarrating" aria-hidden=" true"></i>
           </div>
           <div class="movie-details-session">
-                  ${movieDetails.sessions
+                  ${tempmovieDetails.sessions
                     .map(session => {
                       return (
                         session.state +
@@ -116,7 +143,8 @@ frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
                         createSessionhtml(session.sessionDateTime)
                       );
                     })
-                    .join("\n")}</div>
+                    .join("\n")}
+                    </div>
       </div>
   </div>
 </div>
@@ -129,6 +157,7 @@ frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
       <div class="movie-details-title"><i class="fa fa-users movie-cast" id="moviecast" aria-hidden="true"></i>Starring</div>
       <ul class="movie-cast-list" id="moviecastlist">
       ${movieDetails.leadActors
+        .join(",")
         .split(",")
         .map(leadActor => {
           return '<li class="movie-cast-name" id="">' + leadActor;
