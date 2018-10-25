@@ -151,9 +151,8 @@ frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
                  return `${session.cinema.state} - ${
                    session.cinema.location
                  } <div class="movie-details-booking" id="moviedetailsbooking">
-                 <button class="movie-book-btn"><i class="fa fa-ticket movie-ticket" id="movieticket"
-                         aria-hidden="true"></i>Book
-                     now</button>
+                 <button class="movie-book-btn"><i class="fas fa-ticket-alt movie-ticket" id="movieticket"
+                         aria-hidden="true"></i>Book now</button>
              </div><br>
                    ${createSessionhtml(session.sessionDateTime)}<br>
                     `;
