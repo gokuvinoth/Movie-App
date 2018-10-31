@@ -15,7 +15,7 @@ xhr.onreadystatechange = () => {
 // url to call api
 xhr.open(
   "GET",
-  "https://salty-sea-40504.herokuapp.com/api/v1/movies/getSessions"
+  "https://salty-sea-40504.herokuapp.com/api/v1/movies/getall"
 );
 xhr.send();
 
