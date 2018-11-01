@@ -1,40 +1,168 @@
-let resultElement = document.querySelector("#movies");
+let moviesList = document.querySelector("#movies");
 let APIData = [];
-
-// Calling the movie result api
-
-const xhr = new XMLHttpRequest();
-xhr.responseType = "json";
-xhr.onreadystatechange = () => {
-  if (xhr.readyState === XMLHttpRequest.DONE) {
-    APIData = xhr.response.content;
-    // function call to process api result
-    displayListView(APIData);
-  }
-};
-// url to call api
-xhr.open(
-  "GET",
-  "https://salty-sea-40504.herokuapp.com/api/v1/movies/getall"
-);
-xhr.send();
-
-const changeTitle = titleValue => {
-  document.getElementById("page-title").innerHTML = titleValue;
-};
-
-let backBtn = document.querySelector("#backbtn");
-backBtn.addEventListener("click", function() {
-  displayListView(APIData);
+let API_URL = "https://ozindianmovies.herokuapp.com/api/v1/movies/";
+// "https://ozindianmovies.herokuapp.com/api/v1/movies/";
+let API_Endpoint = API_URL + `getsessions`;
+let backButton = document.querySelector("#backButton");
+backButton.addEventListener("click", function() {
+  renderMovieList(APIData);
 });
 
-function RatingStarHtmlElement(ratingValue) {
-  let ratingCounter = [0, 0, 0];
-  let totalRatingCount = ratingValue;
-  ratingCounter[0] = Math.floor(totalRatingCount % 5);
-  ratingCounter[1] = Math.round(totalRatingCount % 1);
-  ratingCounter[2] = 5 - ratingCounter[0] - ratingCounter[1];
+function renderMovieList(apiData) {
+  changeTitle("Ozziewood Movies");
+  backButton.style.display = "none";
+  moviesList.innerHTML = apiData
+    .map(data => movieItemTemplate(data))
+    .join("\n");
 
+  let movies = document.querySelectorAll("#movielist > .movie");
+  movies.forEach(movie => {
+    movie.addEventListener("click", () => renderMovieDetails(movie.id));
+  });
+}
+// Calling the movie result api
+callApi(API_Endpoint, renderMovieList);
+
+function callApi(API_Endpoint, callback) {
+  const xhr = new XMLHttpRequest();
+  xhr.responseType = "json";
+  xhr.onreadystatechange = () => {
+    if (xhr.readyState === XMLHttpRequest.DONE) {
+      APIData = xhr.response.content;
+      callback(APIData);
+    }
+  };
+  xhr.open("GET", API_Endpoint);
+  xhr.send();
+}
+
+let searchBarTextBox = document.querySelector("#searchBarTextBox");
+let searchText = document.querySelector("#searchText");
+let searchBar = document.querySelector("#searchBar");
+let searchBarPane = document.querySelector("#searchBarPane");
+let filterBar = document.querySelector("#filterBar");
+
+searchBar.addEventListener("click", function() {
+  console.log("clicked");
+  searchBarTextBox.classList.toggle("is-hidden");
+});
+
+filterBar.addEventListener("click", function() {
+  console.log("clicked");
+  searchBarPane.classList.toggle("is-hidden");
+});
+
+searchText.addEventListener("input", function() {
+  let searchTextValue = searchText.value;
+  renderMovieList(filterSearchText(APIData, searchTextValue));
+});
+
+let filters = {};
+filters = {
+  language: [],
+  location: []
+};
+
+let languageTamil = document.querySelector("#languageTamil");
+languageTamil.addEventListener("click", function() {
+  modifyFilterData(filters, "language", languageTamil.value);
+});
+let languageMarathi = document.querySelector("#languageMarathi");
+languageMarathi.addEventListener("click", function() {
+  modifyFilterData(filters, "language", languageMarathi.value);
+});
+let languageMalayalam = document.querySelector("#languageMalayalam");
+languageMalayalam.addEventListener("click", function() {
+  modifyFilterData(filters, "language", languageMalayalam.value);
+});
+let languageTelugu = document.querySelector("#languageTelugu");
+languageTelugu.addEventListener("click", function() {
+  modifyFilterData(filters, "language", languageTelugu.value);
+});
+let languageKannada = document.querySelector("#languageKannada");
+languageKannada.addEventListener("click", function() {
+  modifyFilterData(filters, "language", languageKannada.value);
+});
+let languageHindi = document.querySelector("#languageHindi");
+languageHindi.addEventListener("click", function() {
+  modifyFilterData(filters, "language", languageHindi.value);
+});
+let locationACT = document.querySelector("#locationACT");
+locationACT.addEventListener("click", function() {
+  modifyFilterData(filters, "location", locationACT.value);
+});
+let locationNSW = document.querySelector("#locationNSW");
+locationNSW.addEventListener("click", function() {
+  modifyFilterData(filters, "location", locationNSW.value);
+});
+let locationVIC = document.querySelector("#locationVIC");
+locationVIC.addEventListener("click", function() {
+  modifyFilterData(filters, "location", locationVIC.value);
+});
+let locationNT = document.querySelector("#locationNT");
+locationNT.addEventListener("click", function() {
+  modifyFilterData(filters, "location", locationNT.value);
+});
+let locationSA = document.querySelector("#locationSA");
+locationSA.addEventListener("click", function() {
+  modifyFilterData(filters, "location", locationSA.value);
+});
+let locationTAS = document.querySelector("#locationTAS");
+locationTAS.addEventListener("click", function() {
+  modifyFilterData(filters, "location", locationTAS.value);
+});
+
+let searchSave = document.querySelector("#searchSaveButton");
+searchSave.addEventListener("click", function() {
+  searchBarPane.classList.toggle("search-bar-off");
+  callApi(filtersApplied(filters, API_URL), renderMovieList);
+});
+
+function filtersApplied(filters, API_URL) {
+  let API_Endpoint = `${API_URL}getall`;
+  if (filters.language.length > 0) {
+    API_Endpoint = `${API_URL}getSessions?languages=${filters.language.join(
+      ","
+    )}`;
+  }
+  if (filters.location.length > 0) {
+    if (filters.language.length > 0) {
+      API_Endpoint = API_Endpoint + `&states=${filters.location.join(",")}`;
+    } else {
+      API_Endpoint = `${API_URL}getSessions?states=${filters.location.join(
+        ","
+      )}`;
+    }
+  }
+  return API_Endpoint;
+}
+
+function filterSearchText(movies, searchTxt) {
+  movies = movies.filter(
+    movie =>
+      searchTxt.length > 0
+        ? movie.title.toLowerCase().includes(searchTxt.toLowerCase())
+        : true
+  );
+  return movies;
+}
+
+function modifyFilterData(filterObject, filterKey, filterValue) {
+  if (filterObject[filterKey].indexOf(filterValue) === -1) {
+    filterObject[filterKey].push(filterValue);
+  } else {
+    filterObject[filterKey].splice(
+      filterObject[filterKey].indexOf(filterValue),
+      1
+    );
+  }
+}
+
+function changeTitle(title) {
+  document.getElementById("page-title").innerHTML = title;
+}
+
+function ratingStarTemplate(ratingCounter) {
   return `
   ${'<i class="fas fa-star movie-star-rating"  aria-hidden=" true"></i>'.repeat(
     ratingCounter[0]
@@ -47,48 +175,41 @@ function RatingStarHtmlElement(ratingValue) {
   )}`;
 }
 
-// mapping response to respective HTML elements
-renderHtml = responseData => {
+function ratingStarCalulation(ratingValue) {
+  let ratingCounter = [0, 0, 0];
+  let totalRatingCount = ratingValue;
+  ratingCounter[0] = Math.floor(totalRatingCount % 5);
+  ratingCounter[1] = Math.round(totalRatingCount % 1);
+  ratingCounter[2] = 5 - ratingCounter[0] - ratingCounter[1];
+  return ratingStarTemplate(ratingCounter);
+}
+
+function movieItemTemplate(movie) {
   return `<ul class="movie-list" id="movielist">
-  <li class="movie" id="${responseData._id}">
+  <li class="movie" id="${movie._id}">
       <div class="column-left">
-          <img class="movie-poster" src="${responseData.poster}"
-              alt="${responseData.title || "Movie poster"}">
+          <img class="movie-poster" src="${movie.poster}"
+              alt="${movie.title || "Movie poster"}">
       </div>
       <div class="column-right">
-          <h2 class="movie-title">${responseData.title || "Untitled"}</h2>
-          <div><p class="movie-rating">${responseData.language ||
-            "Unknown"} | ${RatingStarHtmlElement(responseData.rating)}</p>
+          <h2 class="movie-title">${movie.title || "Untitled"}</h2>
+          <div><p class="movie-rating">${movie.language ||
+            "Unknown"} | ${ratingStarCalulation(movie.rating)}</p>
           <p class="movie-language"></p><div>
-          <p class="movie-duration"><i class="fas fa-hourglass-start"></i> ${responseData.duration ||
+          <p class="movie-duration"><i class="fas fa-hourglass-start"></i> ${movie.duration ||
             "Unknown"} minutes</p>
       </div>
   </li>
   </ul>`;
-};
+}
 
-const displayListView = apiData => {
-  changeTitle("Latest Movies");
-  backBtn.style.display = "none";
-  resultElement.innerHTML = apiData.map(data => renderHtml(data)).join("\n");
-  let thumbnails = document.querySelectorAll("#movielist > li");
-  thumbnails.forEach(function(thumbnail) {
-    thumbnail.addEventListener("click", function() {
-      // Set clicked image as display image.
-      NavDetailview(thumbnail.id);
-    });
-  });
-};
-
-const NavDetailview = id => {
-  let movieDetails = APIData.find(function(element) {
-    return element._id === id;
-  });
+function renderMovieDetails(id) {
+  let movieDetails = APIData.find(element => element._id === id);
 
   changeTitle(movieDetails.title);
-  backBtn.style.display = "contents";
+  backButton.style.display = "block";
 
-  resultElement.innerHTML = `    <div class="movie-details" id="moviedetails">
+  moviesList.innerHTML = `    <div class="movie-details" id="moviedetails">
   <div class="movie-details-tcontainer" id="moviedetailscontainer">
       <div class="movie-details-trailer" id="moviedetailstrailer">
           <iframe class="movie-trailer" id="${
@@ -108,7 +229,7 @@ frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
                       } <i class="fa fa-hourglass-half movie-duration-time" id="moviedurationtime"
                       aria-hidden="true"></i></div>
               <div class="movie-detail-rating" id="moviedetailrating">
-                   ${RatingStarHtmlElement(movieDetails.rating)}
+                   ${ratingStarCalulation(movieDetails.rating)}
               </div>
           </div>
       </div>
@@ -148,17 +269,18 @@ frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
           <div class="movie-details-session-off" id = "moviedetailssession">
              ${movieDetails.sessions
                .map(session => {
-                 return `${session.cinema.state} - ${
+                 return `${session.cinema.state} 
+                 - ${
                    session.cinema.location
-                 } <div class="movie-details-booking" id="moviedetailsbooking">
+                 }<div class="movie-details-booking" id="moviedetailsbooking">
                  <button class="movie-book-btn"><i class="fas fa-ticket-alt movie-ticket" id="movieticket"
                          aria-hidden="true"></i>Book now</button>
              </div><br>
-                   ${createSessionhtml(session.sessionDateTime)}<br>
+                   ${renderSessionDetails(session.sessionDateTime)}<br>
                     `;
                })
                .join("\n")}
-             
+
           </div>
       </div>
   </div>
@@ -167,8 +289,9 @@ frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   let sessionDivElement = document.querySelector("#moviedetailssession");
   let MovieDetailsDivElement = document.querySelector("#moviedetailsstory");
   let MovieSessionsBtn = document.querySelector("#moviesession");
+  let MovieNameBtn = document.querySelector("#moviename");
+
   MovieSessionsBtn.addEventListener("click", function() {
-    console.log(resultElement);
     sessionDivElement.classList.add("movie-details-session");
     MovieSessionsBtn.classList.add("movie-session");
     MovieSessionsBtn.classList.remove("movie-session-off");
@@ -178,9 +301,8 @@ frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
     MovieNameBtn.classList.remove("movie-name");
     MovieDetailsDivElement.classList.remove("movie-details-story");
   });
-  let MovieNameBtn = document.querySelector("#moviename");
+
   MovieNameBtn.addEventListener("click", function() {
-    console.log(resultElement);
     sessionDivElement.classList.remove("movie-details-session");
     MovieSessionsBtn.classList.remove("movie-session");
     MovieSessionsBtn.classList.add("movie-session-off");
@@ -202,16 +324,17 @@ frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
   function sessionDateTimeTemplate(sessionObj) {
     let dateTimeHtmlElement = "";
     Object.keys(sessionObj).forEach(date => {
-      dateTimeHtmlElement += `<i class="fa fa-calendar movie-session-calendar" id="" aria-hidden="true"></i> ${date} : <i class="far fa-clock movie-session-clock" id="" aria-hidden="true"></i>
+      dateTimeHtmlElement += `<i class="fa fa-calendar movie-session-calendar" id="" aria-hidden="true"></i> ${date}
+       : <i class="far fa-clock movie-session-clock" id="" aria-hidden="true"></i>
        ${sessionObj[date]} <br>`;
     });
 
     return dateTimeHtmlElement;
   }
 
-  function createSessionhtml(sessionDateTimes) {
+  function renderSessionDetails(sessionDateTimes) {
     let sessionObj = {};
-    console.log(sessionDateTimes);
+
     sessionDateTimes.forEach(sessionDateTime => {
       const date = convertDate(sessionDateTime);
       const time = timeAMPMConversion(sessionDateTime);
@@ -234,4 +357,4 @@ frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
       return `${timeValue}:${DatetimeValue.split("T")[1].split(":")[1]} AM`;
     }
   }
-};
+}
